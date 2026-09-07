@@ -368,10 +368,10 @@ table.print-table th{
   font-size:15px;
 }
 table.print-table td.c-num{ width:6%; text-align:center; }
-table.print-table td.c-name{ width:58%; text-align:left; }
+table.print-table td.c-name{ width:50%; text-align:left; }
 table.print-table td.c-unit{ width:10%; text-align:center; }
 table.print-table td.c-qty{ width:11%; text-align:center; }
-table.print-table td.c-sum{ width:17%; text-align:left; }
+table.print-table td.c-sum{ width:23%; text-align:left; }
 .sig-line{
   display:flex;
   align-items:baseline;

@@ -112,7 +112,7 @@ function buildRows(){
     tr.innerHTML = `
       <td class="num">${i}</td>
       <td data-label="Наименование"><input data-row="${i}" data-field="name" type="text"></td>
-      <td data-label="Ед.изм"><input data-row="${i}" data-field="unit" type="text"></td>
+      <td data-label="Ед.изм"><input data-row="${i}" data-field="unit" type="text" value="шт"></td>
       <td data-label="Кол-во"><input data-row="${i}" data-field="qty" type="text" inputmode="decimal"></td>
       <td data-label="Сумма"><input data-row="${i}" data-field="sum" type="text"></td>
     `;
@@ -141,7 +141,7 @@ function fillItems(items){
   items.forEach((it,idx)=>{
     const i = idx+1;
     setVal(`[data-row="${i}"][data-field="name"]`, it.name);
-    setVal(`[data-row="${i}"][data-field="unit"]`, it.unit);
+    setVal(`[data-row="${i}"][data-field="unit"]`, it.unit || 'шт');
     setVal(`[data-row="${i}"][data-field="qty"]`, it.qty);
     setVal(`[data-row="${i}"][data-field="sum"]`, it.sum);
   });
@@ -153,7 +153,7 @@ function setVal(sel, v){
 
 function addRow(){
   const items = collectItems();
-  items.push({name:'',unit:'',qty:'',sum:''});
+  items.push({name:'',unit:'шт',qty:'',sum:''});
   ROWS = items.length;
   buildRows();
   items.forEach((it,idx)=>{
@@ -173,7 +173,7 @@ function removeRow(){
   items.forEach((it,idx)=>{
     const i = idx+1;
     setVal(`[data-row="${i}"][data-field="name"]`, it.name);
-    setVal(`[data-row="${i}"][data-field="unit"]`, it.unit);
+    setVal(`[data-row="${i}"][data-field="unit"]`, it.unit || 'шт');
     setVal(`[data-row="${i}"][data-field="qty"]`, it.qty);
     setVal(`[data-row="${i}"][data-field="sum"]`, it.sum);
   });
@@ -213,13 +213,47 @@ function esc(str){
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+/* ---------- Лотин → Кирилл (ўзбекча) ---------- */
+function hasCyrillic(str){
+  return /[\u0400-\u04FF]/.test(str || '');
+}
+function latinToCyrillicUz(str){
+  if(!str) return str;
+  if(hasCyrillic(str)) return str; /* аллақачон кирилча — тегмаймиз */
+  let s = str;
+  const AP = "['’ʻʼ`]";
+  s = s.replace(new RegExp(`o${AP}`, 'g'), 'ў').replace(new RegExp(`O${AP}`, 'g'), 'Ў');
+  s = s.replace(new RegExp(`g${AP}`, 'g'), 'ғ').replace(new RegExp(`G${AP}`, 'g'), 'Ғ');
+  const digraphs = [['sh','ш'],['ch','ч'],['yo','ё'],['yu','ю'],['ya','я'],['ye','е']];
+  digraphs.forEach(([lat, cyr])=>{
+    s = s.replace(new RegExp(lat, 'g'), cyr);
+    s = s.replace(new RegExp(lat.charAt(0).toUpperCase()+lat.slice(1), 'g'), cyr.toUpperCase());
+    s = s.replace(new RegExp(lat.toUpperCase(), 'g'), cyr.toUpperCase());
+  });
+  s = s.replace(new RegExp(AP, 'g'), 'ъ');
+  const singles = {
+    a:'а', b:'б', d:'д', e:'е', f:'ф', g:'г', h:'ҳ', i:'и', j:'ж',
+    k:'к', l:'л', m:'м', n:'н', o:'о', p:'п', q:'қ', r:'р', s:'с',
+    t:'т', u:'у', v:'в', x:'х', y:'й', z:'з', c:'с'
+  };
+  s = s.replace(/[a-zA-Z]/g, (ch)=>{
+    const cyr = singles[ch.toLowerCase()];
+    if(!cyr) return ch;
+    return (ch === ch.toUpperCase()) ? cyr.toUpperCase() : cyr;
+  });
+  return s;
+}
+function printText(str){
+  return esc(latinToCyrillicUz(str));
+}
+
 function renderCopyHTML(data){
   let rows = '';
   data.items.forEach((it,idx)=>{
     rows += `<tr>
       <td class="c-num">${idx+1}</td>
-      <td class="c-name">${esc(it.name)}</td>
-      <td class="c-unit">${esc(it.unit)}</td>
+      <td class="c-name">${printText(it.name)}</td>
+      <td class="c-unit">${printText(it.unit)}</td>
       <td class="c-qty">${esc(it.qty)}</td>
       <td class="c-sum">${esc(it.sum)}</td>
     </tr>`;
@@ -230,25 +264,25 @@ function renderCopyHTML(data){
   return `
     <h3>НАКЛАДНАЯ № <span class="num-underline">${esc(data.num)}</span></h3>
     <div class="meta-block">
-      <div class="meta-line">Отправитель: <span class="val">${esc(data.sender)}</span></div>
-      <div class="meta-line">Получатель: <span class="val">${esc(data.receiver)}</span></div>
+      <div class="meta-line">Отправитель: <span class="val">${printText(data.sender)}</span></div>
+      <div class="meta-line">Получатель: <span class="val">${printText(data.receiver)}</span></div>
       <div class="meta-line">Дата отправки: <span class="val">${esc(formatDateForPrint(data.date_send))}</span></div>
     </div>
     <table class="print-table">
       <colgroup>
         <col style="width:6%">
-        <col style="width:56%">
+        <col style="width:50%">
         <col style="width:10%">
         <col style="width:11%">
-        <col style="width:17%">
+        <col style="width:23%">
       </colgroup>
       <thead><tr><th>№</th><th>Наименование</th><th>Ед.изм</th><th>Кол-во</th><th>Сумма</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="sig-line"><span class="left">Отправил (ФИО): <span class="val">${esc(data.sent_by)}</span>${sigImg}</span><span class="tag">(подпись)</span></div>
-    <div class="sig-line"><span class="left">Водитель (ФИО): <span class="val">${esc(data.driver)}</span></span><span class="tag">(подпись)</span></div>
-    <div class="sig-line"><span class="left">Получил (ФИО): <span class="val">${esc(data.received_by)}</span></span><span class="tag">(подпись)</span></div>
-    <div class="sig-line"><span class="left">Автомобиль: <span class="val">${esc(data.car)}</span></span><span class="tag">(подпись)</span></div>
+    <div class="sig-line"><span class="left">Отправил (ФИО): <span class="val">${printText(data.sent_by)}</span>${sigImg}</span><span class="tag">(подпись)</span></div>
+    <div class="sig-line"><span class="left">Водитель (ФИО): <span class="val">${printText(data.driver)}</span></span><span class="tag">(подпись)</span></div>
+    <div class="sig-line"><span class="left">Получил (ФИО): <span class="val">${printText(data.received_by)}</span></span><span class="tag">(подпись)</span></div>
+    <div class="sig-line"><span class="left">Автомобиль: <span class="val">${printText(data.car)}</span></span><span class="tag">(подпись)</span></div>
   `;
 }
 
