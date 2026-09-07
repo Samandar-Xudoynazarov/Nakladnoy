@@ -2,6 +2,14 @@ const STORE_KEY = 'nakladnaya:lastdata';
 const SIG_STORE_KEY = 'nakladnaya:signature';
 let ROWS = 10;
 let signatureDataUrl = '';
+let copyMode = 2;
+
+function setCopyMode(n){
+  copyMode = n;
+  document.querySelectorAll('.copy-toggle-btn').forEach(btn=>{
+    btn.classList.toggle('active', Number(btn.dataset.copies) === n);
+  });
+}
 
 /* ---------- Signature pad ---------- */
 let sigCtx = null;
@@ -178,7 +186,8 @@ function gatherFormData(){
     sent_by: g('f_sent_by'), driver: g('f_driver'), received_by: g('f_received_by'),
     car: g('f_car'),
     items: collectItems(),
-    signature: signatureDataUrl
+    signature: signatureDataUrl,
+    copies: copyMode
   };
 }
 function g(id){ const el=document.getElementById(id); return el ? el.value : ''; }
@@ -246,8 +255,15 @@ function renderCopyHTML(data){
 async function doPrint(){
   const data = gatherFormData();
   const html = renderCopyHTML(data);
+  const sheetInner = document.querySelector('#printSheet .sheet');
   document.getElementById('copyA').innerHTML = html;
-  document.getElementById('copyB').innerHTML = html;
+  if(copyMode === 1){
+    document.getElementById('copyB').innerHTML = '';
+    sheetInner.classList.add('single');
+  } else {
+    document.getElementById('copyB').innerHTML = html;
+    sheetInner.classList.remove('single');
+  }
   try{
     await window.storage.set(STORE_KEY, JSON.stringify(data), false);
   }catch(e){}
@@ -287,6 +303,7 @@ function resetForm(){
   ['f_num','f_receiver','f_sent_by','f_driver','f_received_by','f_car'].forEach(id=>s(id,''));
   s('f_date_send', todayISO());
   clearSavedSignature();
+  setCopyMode(2);
   ROWS = 10;
   buildRows();
 }
@@ -312,6 +329,7 @@ async function loadLast(){
       s('f_driver', data.driver);
       s('f_received_by', data.received_by);
       s('f_car', data.car);
+      setCopyMode(data.copies === 1 ? 1 : 2);
       if(data.items && data.items.length){ fillItems(data.items); }
     } else {
       s('f_sender', '"ЭКМ" МЧЖ');

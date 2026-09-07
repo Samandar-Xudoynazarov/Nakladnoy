@@ -71,6 +71,27 @@ h1{
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
+.copy-toggle{
+  display:flex;
+  gap:8px;
+}
+.copy-toggle-btn{
+  flex:1;
+  border:1px solid #d1d5db;
+  background:#fbfbfc;
+  color:var(--ink);
+  padding:9px 8px;
+  border-radius:9px;
+  font-size:13.5px;
+  font-weight:600;
+  font-family:inherit;
+  cursor:pointer;
+}
+.copy-toggle-btn.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
 table.edit-table{
   width:100%;
   border-collapse:collapse;
@@ -288,6 +309,12 @@ table.edit-table td.num{
   bottom:0;
   right:-0.5mm;
   border-right:1px solid #000;
+}
+.sheet.single .copy:first-child::after{
+  display:none;
+}
+.sheet.single #copyB{
+  display:none;
 }
 .copy h3{
   text-align:left;
