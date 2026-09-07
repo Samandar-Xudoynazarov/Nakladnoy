@@ -236,7 +236,7 @@ function renderCopyHTML(data){
       <thead><tr><th>№</th><th>Наименование</th><th>Ед.изм</th><th>Кол-во</th><th>Сумма</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="sig-line"><span class="left">Отправил (ФИО): <span class="val">${esc(data.sent_by)}${sigImg}</span></span><span class="tag">(подпись)</span></div>
+    <div class="sig-line"><span class="left">Отправил (ФИО): <span class="val">${esc(data.sent_by)}</span>${sigImg}</span><span class="tag">(подпись)</span></div>
     <div class="sig-line"><span class="left">Водитель (ФИО): <span class="val">${esc(data.driver)}</span></span><span class="tag">(подпись)</span></div>
     <div class="sig-line"><span class="left">Получил (ФИО): <span class="val">${esc(data.received_by)}</span></span><span class="tag">(подпись)</span></div>
     <div class="sig-line"><span class="left">Автомобиль: <span class="val">${esc(data.car)}</span></span><span class="tag">(подпись)</span></div>

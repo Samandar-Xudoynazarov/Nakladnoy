@@ -331,7 +331,7 @@ table.print-table th, table.print-table td{
   border:1px solid #000;
   padding:4px 6px;
   font-size:16px;
-  height:44px;
+  height:36px;
 }
 table.print-table th{
   text-align:center;
@@ -374,8 +374,8 @@ table.print-table td.c-sum{ width:17%; text-align:left; }
   margin-left:10px;
 }
 .sig-img{
-  height:24px;
-  vertical-align:middle;
-  margin-left:8px;
-  transform:translateY(4px);
+  height:40px;
+  flex:0 0 auto;
+  margin-left:10px;
+  transform:translateY(10px);
 }
