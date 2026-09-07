@@ -282,7 +282,7 @@ function renderCopyHTML(data){
     <div class="sig-line"><span class="left">Отправил (ФИО): <span class="val">${printText(data.sent_by)}</span>${sigImg}</span><span class="tag">(подпись)</span></div>
     <div class="sig-line"><span class="left">Водитель (ФИО): <span class="val">${printText(data.driver)}</span></span><span class="tag">(подпись)</span></div>
     <div class="sig-line"><span class="left">Получил (ФИО): <span class="val">${printText(data.received_by)}</span></span><span class="tag">(подпись)</span></div>
-    <div class="sig-line"><span class="left">Автомобиль: <span class="val">${printText(data.car)}</span></span><span class="tag">(подпись)</span></div>
+    <div class="sig-line"><span class="left">Автомобиль: <span class="val">${esc(data.car)}</span></span><span class="tag">(подпись)</span></div>
   `;
 }
 
