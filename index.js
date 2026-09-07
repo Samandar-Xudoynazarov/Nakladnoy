@@ -16,7 +16,20 @@ let sigCtx = null;
 let sigDrawing = false;
 let sigLastX = 0, sigLastY = 0;
 
+let sigSavedScrollY = 0;
+function lockBodyScroll(){
+  sigSavedScrollY = window.scrollY || window.pageYOffset || 0;
+  document.body.classList.add('modal-open');
+  document.body.style.top = `-${sigSavedScrollY}px`;
+}
+function unlockBodyScroll(){
+  document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, sigSavedScrollY);
+}
+
 function openSigPad(){
+  lockBodyScroll();
   const modal = document.getElementById('sigModal');
   modal.classList.add('open');
   const canvas = document.getElementById('sigCanvas');
@@ -39,6 +52,7 @@ function openSigPad(){
 }
 function closeSigPad(){
   document.getElementById('sigModal').classList.remove('open');
+  unlockBodyScroll();
 }
 function sigPos(e, canvas){
   const rect = canvas.getBoundingClientRect();

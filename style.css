@@ -13,6 +13,14 @@ body{
   background:var(--bg);
   color:var(--ink);
 }
+/* Imzo paneli ochiq bo'lganda orqadagi sahifa scrollini bloklaydi */
+body.modal-open{
+  position:fixed;
+  left:0;
+  right:0;
+  width:100%;
+  overflow:hidden;
+}
 
 /* ---------- Screen (form) UI ---------- */
 .app{
@@ -230,6 +238,8 @@ table.edit-table td.num{
   align-items:center;
   justify-content:center;
   padding:16px;
+  overscroll-behavior:none;
+  touch-action:none;
 }
 .sig-modal.open{
   display:flex;
