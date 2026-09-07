@@ -283,7 +283,10 @@ table.edit-table td.num{
 }
 #printSheet{
   width:287mm;
-  background:#fff;
+}
+/* Toq (1 nusxa) tanlanganda — vertikal A4 kengligi (297mm - 2*5mm margin = 287mm o'rniga 210mm - 10mm) */
+#printSheet.portrait{
+  width:200mm;
 }
 
 .sheet{

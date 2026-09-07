@@ -29,7 +29,7 @@ function openSigPad(){
   sigCtx.lineWidth = 2.6;
   sigCtx.lineCap = 'round';
   sigCtx.lineJoin = 'round';
-  sigCtx.strokeStyle = '#1a3fa0'; /* кок ручка ранги */
+  sigCtx.strokeStyle = '#1a3fa0'; 
   clearSigCanvas();
 
   canvas.onpointerdown = sigStart;
@@ -311,12 +311,15 @@ async function doPrint(){
   const wrapEl = document.getElementById('printSheetWrap');
   const filename = 'nakladnaya' + (data.num ? '_' + data.num.replace(/[^\w-]+/g,'') : '') + '.pdf';
 
+  /* Toq (1 nusxa) — vertikal A4, Juft (2 nusxa) — albom A4 */
+  sheetEl.classList.toggle('portrait', copyMode === 1);
+
   const opt = {
     margin: [5,5,5,5],
     filename: filename,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 3, useCORS: true, scrollX: 0, scrollY: 0 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: copyMode === 1 ? 'portrait' : 'landscape' },
     pagebreak: { mode: ['avoid-all'] }
   };
 
