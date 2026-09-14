@@ -340,9 +340,45 @@ async function doPrint(){
   wrapEl.classList.add('capturing');
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
   try{
-    await html2pdf().set(opt).from(sheetEl).save();
+    // Avval PDF'ni Blob sifatida yaratamiz.
+    // iPhone/iPad (Safari va Telegram ichki brauzeri)da .save() ba'zan
+    // PDF o'rniga blob: URL bilan ishlaydi. Web Share API orqali esa
+    // haqiqiy PDF fayl yuboriladi.
+    const pdfBlob = await html2pdf().set(opt).from(sheetEl).outputPdf('blob');
+    const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+    // iPhone/Android: PDF'ni haqiqiy fayl sifatida Share qilish.
+    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [pdfFile] }))) {
+      await navigator.share({
+        files: [pdfFile],
+        title: filename,
+        text: 'Накладная PDF'
+      });
+    } else {
+      // Web Share mavjud bo'lmasa, PDF'ni yangi oynada ochamiz.
+      // Bu fallback ayniqsa desktop brauzerlar uchun.
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const opened = window.open(blobUrl, '_blank');
+
+      if (!opened) {
+        // Popup bloklangan bo'lsa, oddiy download fallback.
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+
+      // Oynaga kerak bo'lishi mumkinligi sababli URL'ni darhol revoke qilmaymiz.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    }
   }catch(e){
-    alert('PDF тайёрлашда хатолик юз берди. Қайта уриниб кўринг.');
+    // Foydalanuvchi Share oynasini Cancel qilgan bo'lsa, xato ko'rsatmaymiz.
+    if (e && e.name !== 'AbortError') {
+      console.error('PDF error:', e);
+      alert('PDF тайёрлашда хатолик юз берди. Қайта уриниб кўринг.');
+    }
   }finally{
     wrapEl.classList.remove('capturing');
     btn.textContent = oldText;
