@@ -196,7 +196,7 @@ function removeRow(){
 function gatherFormData(){
   return {
     num: g('f_num'), sender: g('f_sender'), receiver: g('f_receiver'),
-    date_send: g('f_date_send'),
+    date_send: g('f_date_send'), contract: g('f_contract'),
     sent_by: g('f_sent_by'), driver: g('f_driver'), received_by: g('f_received_by'),
     car: g('f_car'),
     items: collectItems(),
@@ -281,6 +281,7 @@ function renderCopyHTML(data){
       <div class="meta-line">Отправитель: <span class="val">${printText(data.sender)}</span></div>
       <div class="meta-line">Получатель: <span class="val">${printText(data.receiver)}</span></div>
       <div class="meta-line">Дата отправки: <span class="val">${esc(formatDateForPrint(data.date_send))}</span></div>
+      <div class="meta-line">Договор №: <span class="val">${printText(data.contract)}</span></div>
     </div>
     <table class="print-table">
       <colgroup>
@@ -296,11 +297,19 @@ function renderCopyHTML(data){
     <div class="sig-line"><span class="left">Отправил (ФИО): <span class="val">${printText(data.sent_by)}</span>${sigImg}</span><span class="tag">(подпись)</span></div>
     <div class="sig-line"><span class="left">Водитель (ФИО): <span class="val">${printText(data.driver)}</span></span><span class="tag">(подпись)</span></div>
     <div class="sig-line"><span class="left">Получил (ФИО): <span class="val">${printText(data.received_by)}</span></span><span class="tag">(подпись)</span></div>
-    <div class="sig-line"><span class="left">Автомобиль: <span class="val">${esc(data.car)}</span></span><span class="tag">(подпись)</span></div>
+    <div class="sig-line"><span class="left">Автомобиль: <span class="val">${esc(data.car)}</span></span></div>
   `;
 }
 
-async function doPrint(){
+function openChoiceModal(){
+  document.getElementById('choiceModal').classList.add('open');
+}
+function closeChoiceModal(){
+  document.getElementById('choiceModal').classList.remove('open');
+}
+
+async function doPrint(mode){
+  closeChoiceModal();
   const data = gatherFormData();
   const html = renderCopyHTML(data);
   const sheetInner = document.querySelector('#printSheet .sheet');
@@ -347,28 +356,23 @@ async function doPrint(){
     const pdfBlob = await html2pdf().set(opt).from(sheetEl).outputPdf('blob');
     const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
 
-    // iPhone/Android: PDF'ni haqiqiy fayl sifatida Share qilish.
-    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [pdfFile] }))) {
+    // Фойдаланувчи танлаган режимга қараб: "share" — жўнатиш, "download" — юклаб олиш.
+    const wantsShare = mode === 'share';
+    if (wantsShare && navigator.share && (!navigator.canShare || navigator.canShare({ files: [pdfFile] }))) {
       await navigator.share({
         files: [pdfFile],
         title: filename,
         text: 'Накладная PDF'
       });
     } else {
-      // Web Share mavjud bo'lmasa, PDF'ni yangi oynada ochamiz.
-      // Bu fallback ayniqsa desktop brauzerlar uchun.
+      // Юклаб олиш (ёки Share қўллаб-қувватланмаса, fallback).
       const blobUrl = URL.createObjectURL(pdfBlob);
-      const opened = window.open(blobUrl, '_blank');
-
-      if (!opened) {
-        // Popup bloklangan bo'lsa, oddiy download fallback.
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
 
       // Oynaga kerak bo'lishi mumkinligi sababli URL'ni darhol revoke qilmaymiz.
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
@@ -387,7 +391,7 @@ async function doPrint(){
 }
 
 function resetForm(){
-  ['f_num','f_receiver','f_sent_by','f_driver','f_received_by','f_car'].forEach(id=>s(id,''));
+  ['f_num','f_receiver','f_sent_by','f_driver','f_received_by','f_car','f_contract'].forEach(id=>s(id,''));
   s('f_date_send', todayISO());
   clearSavedSignature();
   setCopyMode(2);
@@ -412,6 +416,7 @@ async function loadLast(){
       s('f_sender', data.sender);
       s('f_receiver', data.receiver);
       s('f_date_send', data.date_send || todayISO());
+      s('f_contract', data.contract);
       s('f_sent_by', data.sent_by);
       s('f_driver', data.driver);
       s('f_received_by', data.received_by);

@@ -32,6 +32,10 @@
       <input id="f_date_send" type="date">
     </div>
     <div class="field">
+      <label>Договор №</label>
+      <input id="f_contract" type="text" placeholder="масалан: 45">
+    </div>
+    <div class="field">
       <label>Нусхалар сони</label>
       <div class="copy-toggle">
         <button type="button" class="copy-toggle-btn active" data-copies="2" onclick="setCopyMode(2)">Иккита (жуфт)</button>
@@ -92,7 +96,7 @@
 
 <div class="footer-bar">
   <button class="btn btn-light" style="flex:0 0 auto;" onclick="resetForm()">Тозалаш</button>
-  <button class="btn-primary" id="pdfBtn" onclick="doPrint()">⬇️ PDF юклаб олиш / улашиш</button>
+  <button class="btn-primary" id="pdfBtn" onclick="openChoiceModal()">⬇️ PDF юклаб олиш / улашиш</button>
 </div>
 
 <div id="sigModal" class="sig-modal">
@@ -103,6 +107,17 @@
       <button type="button" class="btn btn-light" onclick="clearSigCanvas()">Тозалаш</button>
       <button type="button" class="btn btn-danger" onclick="closeSigPad()">Бекор қилиш</button>
       <button type="button" class="btn-primary" style="flex:0 0 auto;padding:9px 18px;" onclick="saveSigCanvas()">Сақлаш</button>
+    </div>
+  </div>
+</div>
+
+<div id="choiceModal" class="sig-modal">
+  <div class="sig-modal-inner">
+    <p class="sig-modal-title">PDF нима қилинсин?</p>
+    <div class="sig-modal-actions">
+      <button type="button" class="btn btn-light" onclick="closeChoiceModal()">Бекор қилиш</button>
+      <button type="button" class="btn-primary" style="flex:1;" onclick="doPrint('download')">⬇️ Юклаб олиш</button>
+      <button type="button" class="btn-primary" style="flex:1;" onclick="doPrint('share')">📤 Жўнатиш</button>
     </div>
   </div>
 </div>
